@@ -5,6 +5,9 @@ import nltk
 import pymorphy2
 import math
 
+import sys
+
+
 class lingvo_fetches:
 
     __ent_val = []
@@ -25,9 +28,13 @@ class lingvo_fetches:
 
     def __init__(self, file_name):
         self.file_name = file_name
-        f = open(file_name, 'r')
-        self.__text_mass = f.readlines()
-        f.close()
+        try:
+            f = open(file_name, 'r')
+            self.__text_mass = f.readlines()
+            f.close()
+        except:
+            print('can not read file, please check way')
+            sys.exit()
 
     def set_way_to_dic(self, val):
         if (type(val) == str):
@@ -137,11 +144,15 @@ class lingvo_fetches:
 
     def __link_lems_dic(self, way_to_lems_dic):
         file = open(way_to_lems_dic, 'r')
-        lems_dic = file.readlines()
+        try:
+            lems_dic = file.readlines()
+            file.close()
+        except:
+            print('can not find lems dictionary')
+            sys.exit()
         for line in lems_dic:
             lems = self.__tokens(line)
             self.__list_of_lems.extend(lems)
-        file.close()
 
     def __entrop(self):
         morph = pymorphy2.MorphAnalyzer()
@@ -231,14 +242,14 @@ class lingvo_fetches:
                         list_of_words_in_text[str_of_text[i]] = 1
             else:
                 self.__analit_val.append((chasti_rechi.get('PREP') + chasti_rechi.get('CONJ')
-                                         + chasti_rechi.get('PRCL')) / words_in_text)
+                                          + chasti_rechi.get('PRCL')) / words_in_text)
                 self.__glagol_val.append((chasti_rechi.get('VERB') + chasti_rechi.get('INFN') + chasti_rechi.get('PRTF') +
-                         chasti_rechi.get('PRTS') + chasti_rechi.get('GRND')) / words_in_text)
+                                          chasti_rechi.get('PRTS') + chasti_rechi.get('GRND')) / words_in_text)
                 self.__substat_val.append((chasti_rechi.get('NOUN')) / words_in_text)
                 self.__adjekt_val.append((chasti_rechi.get('ADJF') + chasti_rechi.get('ADJS')) / words_in_text)
                 self.__mestoim_val.append(chasti_rechi.get('NPRO') / words_in_text)
                 self.__autosem_val.append((words_in_text - (chasti_rechi.get('PREP') + chasti_rechi.get('CONJ') + chasti_rechi.get('PRCL'))
-                           - chasti_rechi.get('NPRO')) / words_in_text)
+                                           - chasti_rechi.get('NPRO')) / words_in_text)
                 for key in list_of_words_in_text.keys():
                     if (self.__list_of_lems.count(key) == 1):
                         kol_per_lex += 1
@@ -246,7 +257,7 @@ class lingvo_fetches:
                 self.__lex_razn_val.append(kol_lex / words_in_text)
                 self.__kol_per_lex_in_t_val.append(kol_per_lex / words_in_text)
                 self.__neznam_val.append((chasti_rechi.get('PREP') + chasti_rechi.get('CONJ') +
-                                    chasti_rechi.get('PRCL') + chasti_rechi.get('NPRO')) / words_in_text)
+                                          chasti_rechi.get('PRCL') + chasti_rechi.get('NPRO')) / words_in_text)
                 self.__imen_lex_val.append((chasti_rechi.get('NOUN') + chasti_rechi.get('ADJF')
                                             + chasti_rechi.get('ADJS')) / words_in_text)
                 kol_per_lex = 0
@@ -256,7 +267,6 @@ class lingvo_fetches:
                 chasti_rechi.clear()
                 chasti_rechi = {'NOUN': 0, 'ADJF': 0, 'COMP': 0, 'VERB': 0, 'INFN': 0, 'PRTF': 0, 'PRTS': 0, 'GRND': 0, 'NUMR': 0,
                                 'ADVB': 0, 'NPRO': 0, 'PRED': 0, 'PREP': 0, 'CONJ': 0, 'ADJS': 0, 'PRCL': 0, 'INTJ': 0}
-
 
 
 
