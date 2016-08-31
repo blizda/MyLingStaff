@@ -1,10 +1,8 @@
 import string
 from re import findall
-
 import nltk
 import pymorphy2
 import math
-
 import sys
 
 
@@ -230,7 +228,6 @@ class lingvo_fetches:
                 for i in range(len(str_of_text)):
                     str_of_text[i] = morph.parse(str_of_text[i])[0].normal_form
                     p = morph.parse(str_of_text[i])[0]
-                    #print(p)
                     razb = p.tag.POS
                     if razb in chasti_rechi:
                         chasti_rechi[razb] = chasti_rechi.get(razb) + 1
@@ -267,6 +264,7 @@ class lingvo_fetches:
                 chasti_rechi.clear()
                 chasti_rechi = {'NOUN': 0, 'ADJF': 0, 'COMP': 0, 'VERB': 0, 'INFN': 0, 'PRTF': 0, 'PRTS': 0, 'GRND': 0, 'NUMR': 0,
                                 'ADVB': 0, 'NPRO': 0, 'PRED': 0, 'PREP': 0, 'CONJ': 0, 'ADJS': 0, 'PRCL': 0, 'INTJ': 0}
+
 
 
 
