@@ -3,8 +3,6 @@ from re import findall
 import nltk
 import pymorphy2
 import math
-import sys
-
 
 class lingvo_fetches:
 
@@ -30,9 +28,8 @@ class lingvo_fetches:
             f = open(file_name, 'r')
             self.__text_mass = f.readlines()
             f.close()
-        except:
-            print('can not read file, please check way')
-            sys.exit()
+        except FileNotFoundError:
+            print('can not read %s, please check name' % (file_name))
 
     def set_way_to_dic(self, val):
         if (type(val) == str):
@@ -145,12 +142,12 @@ class lingvo_fetches:
         try:
             lems_dic = file.readlines()
             file.close()
-        except:
-            print('can not find lems dictionary')
-            sys.exit()
-        for line in lems_dic:
-            lems = self.__tokens(line)
-            self.__list_of_lems.extend(lems)
+        except FileNotFoundError:
+            print('can not read %s' %(way_to_lems_dic))
+        else:
+            for line in lems_dic:
+                lems = self.__tokens(line)
+                self.__list_of_lems.extend(lems)
 
     def __entrop(self):
         morph = pymorphy2.MorphAnalyzer()
@@ -264,7 +261,3 @@ class lingvo_fetches:
                 chasti_rechi.clear()
                 chasti_rechi = {'NOUN': 0, 'ADJF': 0, 'COMP': 0, 'VERB': 0, 'INFN': 0, 'PRTF': 0, 'PRTS': 0, 'GRND': 0, 'NUMR': 0,
                                 'ADVB': 0, 'NPRO': 0, 'PRED': 0, 'PREP': 0, 'CONJ': 0, 'ADJS': 0, 'PRCL': 0, 'INTJ': 0}
-
-
-
-
