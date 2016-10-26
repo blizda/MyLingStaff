@@ -214,7 +214,7 @@ class lingvo_fetches:
         words_in_text = 0
         kol_lex = 0
         morph = pymorphy2.MorphAnalyzer()
-        chasti_rechi = {'NOUN': (0), 'ADJF': 0, 'COMP': 0, 'VERB': 0, 'INFN': 0, 'PRTF': 0, 'PRTS': 0, 'GRND': 0,
+        chasti_rechi = {'NOUN': 0, 'ADJF': 0, 'COMP': 0, 'VERB': 0, 'INFN': 0, 'PRTF': 0, 'PRTS': 0, 'GRND': 0,
                         'NUMR': 0, 'ADVB': 0, 'NPRO': 0, 'PRED': 0, 'PREP': 0, 'CONJ': 0, 'ADJS': 0, 'PRCL': 0, 'INTJ': 0}
         list_of_words_in_text = {}
         kol_per_lex = 0
