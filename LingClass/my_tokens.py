@@ -5,8 +5,8 @@ class my_tokens:
 
     __text_mass = ''
     __clear_tokens = []
-    __punct_mass = ['.', ',', '?', '!', '"', '-', ':', '(', ')', '*', ';']
-    __end_of_text = ['.', '?', '!', '*', '"', ';', ':']
+    __punct_mass = ['.', ',', '?', '!', '"', '-', ':', '(', ')', '*', ';', '…', '«', '»', '[', ']', '{', '}', '<', '>']
+    __end_of_text = ['.', '?', '!', '*', '"', ';', ':', '…']
     __occur_of_ent_mass = []
 
     def __init__(self, file_name):
@@ -31,7 +31,7 @@ class my_tokens:
             return False
 
     def __is_initials(self, line):
-        if re.match('\w{1}\.\w{1}', line) is not None:
+        if re.match('\[A-ZА-Я]{1}\.[A-ZА-Я]{1}', line) is not None:
             return True
         else:
             return False
@@ -76,10 +76,12 @@ class my_tokens:
             tokens.append(line[oc_of_ent_pr:])
         return tokens
 
-    def __pars_end_of(self, i):
-        if (self.__clear_tokens[i + 2] == '"') and (self.__clear_tokens[i] == '"'):
+    def __pars_end_of(self, i, tok):
+        if (len(tok) == i + 2):
             return False
-        elif re.match('([А-Я]+[а-я]*)|([A-Z]+[a-z]*)',self.__clear_tokens[i + 1]) or (self.__clear_tokens[i + 1] == '-'):
+        elif (tok[i + 2] == '"') and (tok[i] == '"'):
+            return False
+        elif re.match('([А-Я]+[а-я]*)|([A-Z]+[a-z]*)', tok[i + 1]) or (tok[i + 1] == '–'):
             return True
         else:
             return False
@@ -103,23 +105,23 @@ class my_tokens:
         self.__clear_tokens = [value for value in self.__clear_tokens if value]
         return self.__clear_tokens
 
-    def sigmentation(self):
+    def sigmentation(self, tok):
         priv_end = 0
         count_of_pr = 1
         dict_of_pr = {}
         i = 0
-        for el in self.__clear_tokens:
+        for el in tok:
             if el in self.__end_of_text:
-                if i == len(self.__clear_tokens) - 1:
-                    dict_of_pr[count_of_pr] = self.__clear_tokens[priv_end + 1:]
+                if i == len(tok) - 1:
+                    dict_of_pr[count_of_pr] = tok[priv_end + 1:]
                     priv_end = i
                     count_of_pr += 1
                 elif priv_end == 0:
-                    dict_of_pr[count_of_pr] = self.__clear_tokens[:i + 1]
+                    dict_of_pr[count_of_pr] = tok[:i + 1]
                     priv_end = i
                     count_of_pr += 1
-                elif self.__pars_end_of(i):
-                    dict_of_pr[count_of_pr] = self.__clear_tokens[priv_end + 1:i + 1]
+                elif self.__pars_end_of(i, tok):
+                    dict_of_pr[count_of_pr] = tok[priv_end + 1:i + 1]
                     priv_end = i
                     count_of_pr += 1
             i += 1
