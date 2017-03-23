@@ -9,7 +9,7 @@ import nltk
 import pymorphy2
 import math
 
-from LingClass.parsing.XMLParser import NewsParser
+from LingClass.parsing.MyXMLParser import MyXMLParser
 
 
 class lingvo_fetches:
@@ -35,7 +35,7 @@ class lingvo_fetches:
         try:
             if (file_name.endswith('.xml')):
                 parser = xml.sax.make_parser()
-                hand = NewsParser()
+                hand = MyXMLParser()
                 parser.setContentHandler(hand)
                 parser.parse(file_name)
                 self.__text_mass = hand.retData()

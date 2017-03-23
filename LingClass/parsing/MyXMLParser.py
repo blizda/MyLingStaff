@@ -1,6 +1,6 @@
 import xml.sax
 
-class NewsParser(xml.sax.ContentHandler):
+class MyXMLParser(xml.sax.ContentHandler):
     def __init__(self):
         self.workStr = ''
         self.isText = False
