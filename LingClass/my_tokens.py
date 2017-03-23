@@ -17,6 +17,8 @@ class my_tokens:
             self.__text_mass = self.__text_mass + f.decode(z['encoding'])
         except FileNotFoundError:
             print('can not read %s, please check name' % (file_name))
+    def __init__(self, string):
+        self.__text_mass = string
 
     def __is_url(self, line):
         if re.match('(https?:\/\/)?([\w\.]+)\.([a-z]{2,6}\.?)(\/[\w\.]*)*\/?', line) is not None:

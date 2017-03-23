@@ -1,39 +1,61 @@
 import string
+import xml
 from re import findall
+import re
+
+from nltk.corpus import stopwords
+
 import nltk
 import pymorphy2
 import math
 
-class lingvo_fetches:
+from LingClass.parsing.XMLParser import NewsParser
 
-    __ent_val = []
-    __redab_val = []
-    __analit_val = []
-    __glagol_val = []
-    __substat_val = []
-    __adjekt_val = []
-    __mestoim_val = []
-    __autosem_val = []
-    __lex_razn_val = []
-    __kol_per_lex_in_t_val = []
-    __neznam_val = []
-    __imen_lex_val = []
-    __text_mass = []
-    __way_to_lems_dic = 'lems.txt'
-    __list_of_lems = []
+
+class lingvo_fetches:
 
     def __init__(self, file_name):
         self.file_name = file_name
+        self.__ent_val = []
+        self.__redab_val = []
+        self.__analit_val = []
+        self.__glagol_val = []
+        self.__substat_val =[]
+        self.__adjekt_val = []
+        self.__mestoim_val = []
+        self.__autosem_val = []
+        self.__lex_razn_val = []
+        self.__kol_per_lex_in_t_val = []
+        self.__neznam_val = []
+        self.__imen_lex_val = []
+        self.__text_mass = []
+        self.__list_of_lems = []
+        self.__surpris_val = []
+        self.__way_to_lems_dic = 'lems.txt'
         try:
-            f = open(file_name, 'r')
-            self.__text_mass = f.readlines()
-            f.close()
+            if (file_name.endswith('.xml')):
+                parser = xml.sax.make_parser()
+                hand = NewsParser()
+                parser.setContentHandler(hand)
+                parser.parse(file_name)
+                self.__text_mass = hand.retData()
+            else:
+                f = open(file_name, 'r')
+                self.__text_mass = f.readlines()
+                f.close()
         except FileNotFoundError:
             print('can not read %s, please check name' % (file_name))
 
     def set_way_to_dic(self, val):
         if (type(val) == str):
             self.__way_to_lems_dic = val
+
+    @property
+    def get_surprisal(self):
+        if len(self.__surpris_val) > 0:
+            return self.__surpris_val
+        else:
+            return self.__surprisal()
 
     @property
     def get_redab(self):
@@ -132,9 +154,15 @@ class lingvo_fetches:
     @staticmethod
     def __tokens(line):
         tokens_ent = nltk.word_tokenize(line.lower())
+        stop_words = stopwords.words('russian')
+        stop_words.extend(['что', 'это', 'так', 'вот', 'быть', 'как', 'в', '—', 'к', 'на', "и"])
+        tokens_ent = [i for i in tokens_ent if ( i not in stop_words )]
         tokens_ent = [i for i in tokens_ent if ( i not in string.punctuation )]
         tokens_ent = [i.replace("«", "").replace("»", "").replace("…","").replace("\'\'","").replace("\?","\.")
-                          .replace("!","\.").replace("!\?","\.").replace("?\!","\.").replace(",","") for i in tokens_ent]
+                          .replace("!","\.").replace("!\?","\.").replace("?\!","\.").replace(",","").replace("-","")
+                          .replace("``", "").replace("—", "").replace("*", "") for i in tokens_ent]
+        tokens_ent = [re.sub("(\d+)", "", i) for i in tokens_ent]
+        tokens_ent = [i for i in tokens_ent if i]
         return tokens_ent
 
     def __link_lems_dic(self, way_to_lems_dic):
@@ -149,6 +177,40 @@ class lingvo_fetches:
                 lems = self.__tokens(line)
                 self.__list_of_lems.extend(lems)
 
+    def __surprisal(self):
+        morph = pymorphy2.MorphAnalyzer()
+        list_of_words_in_text = {}
+        bigram_list = {}
+        self.__surpris_val.clear()
+        words_in_text = 0
+        for line in self.__text_mass:
+            str_of_text = self.__tokens(line)
+            if str_of_text:
+                words_in_text += len(str_of_text)
+                for i in range(len(str_of_text)):
+                    str_of_text[i] = morph.parse(str_of_text[i])[0].normal_form
+                    if i > 0:
+                        if (str_of_text[i - 1] + ' ' + str_of_text[i]) in bigram_list:
+                            bigram_list[str_of_text[i - 1] + ' ' + str_of_text[i]] = bigram_list.get(str_of_text[i - 1] + ' ' + str_of_text[i]) + 1
+                        else:
+                            bigram_list[str_of_text[i - 1] + ' ' + str_of_text[i]] = 1
+                    if str_of_text[i] in list_of_words_in_text:
+                        list_of_words_in_text[str_of_text[i]] = list_of_words_in_text.get(str_of_text[i]) + 1
+                    else:
+                        list_of_words_in_text[str_of_text[i]] = 1
+            else:
+                surpr = 0
+                for key in bigram_list.keys():
+                    sovm = bigram_list[key]/ words_in_text
+                    cont_tok = key.split()
+                    context = list_of_words_in_text[cont_tok[0]] / words_in_text
+                    surpr += math.log2(1 / (sovm / context))
+                self.__surpris_val.append(surpr / words_in_text)
+                words_in_text = 0
+                list_of_words_in_text.clear()
+                bigram_list.clear()
+        return self.__surpris_val
+
     def __entrop(self):
         morph = pymorphy2.MorphAnalyzer()
         list_of_words_in_text = {}
@@ -159,6 +221,7 @@ class lingvo_fetches:
         kol_text = 0
         for line in self.__text_mass:
             str_of_text = self.__tokens(line)
+            print(str_of_text)
             if str_of_text:
                 kol_text += 1
                 words_in_text += len(str_of_text)
@@ -168,6 +231,7 @@ class lingvo_fetches:
                         list_of_words_in_text[str_of_text[i]] = list_of_words_in_text.get(str_of_text[i]) + 1
                     else:
                         list_of_words_in_text[str_of_text[i]] = 1
+
             else:
                 entropy = 0
                 for key in list_of_words_in_text.keys():
